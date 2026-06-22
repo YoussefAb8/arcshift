@@ -40,7 +40,7 @@ Built with [Arc Testnet](https://arc.network) as the primary settlement layer an
 
 1. **Clone the repo**:
 ```bash
-   git clone https://github.com/yourusername/arcshift.git
+   git clone https://github.com/YoussefAb8/arcshift.git
    cd arcshift
 ```
 
