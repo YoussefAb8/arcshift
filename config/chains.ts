@@ -7,8 +7,23 @@
  */
 
 import { defineChain } from "viem";
-import { sepolia } from "viem/chains";
 import type { Chain } from "viem";
+
+/**
+ * Ethereum Sepolia - manually defined
+ */
+export const sepoliaTestnet: Chain = defineChain({
+  id: 11155111,
+  name: "Ethereum Sepolia",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://sepolia.infura.io/v3/"] },
+  },
+  blockExplorers: {
+    default: { name: "Etherscan", url: "https://sepolia.etherscan.io" },
+  },
+  testnet: true,
+});
 
 /**
  * Arc Testnet - manually defined
@@ -122,25 +137,18 @@ export const bscTestnet: Chain = defineChain({
   testnet: true,
 });
 
-/** Network mode: always "testnet" for this version */
 export const NETWORK_MODE: "testnet" | "mainnet" = "testnet";
 
-/**
- * Gateway protocol contract addresses (same on all supported chains)
- */
 export const GATEWAY_WALLET_ADDRESS =
   "0x0077777d7EBA4688BDeF3E311b846F25870A19B9" as const;
 export const GATEWAY_MINTER_ADDRESS =
   "0x0022222ABE238Cc2C7Bb1f21003F0a260052475B" as const;
 
-/** Circle's public testnet Gateway API endpoint */
 export const GATEWAY_API_BASE = "https://gateway-api-testnet.circle.com";
 
-/** Arc Testnet native USDC system contract */
 export const ARC_NATIVE_USDC_ADDRESS =
   "0x3600000000000000000000000000000000000000" as const;
 
-/** Configuration shape for a supported chain */
 export interface ChainConfig {
   label: string;
   chain: Chain;
@@ -151,11 +159,6 @@ export interface ChainConfig {
   isPrimary?: boolean;
 }
 
-/**
- * Supported chains registry.
- * Arc Testnet is primary (isPrimary: true).
- * All others are Gateway destinations.
- */
 export const SUPPORTED_CHAINS: Record<string, ChainConfig> = {
   arcTestnet: {
     label: "Arc Testnet",
@@ -168,7 +171,7 @@ export const SUPPORTED_CHAINS: Record<string, ChainConfig> = {
   },
   sepolia: {
     label: "Ethereum Sepolia",
-    chain: sepolia,
+    chain: sepoliaTestnet,
     domainId: 0,
     usdcAddress: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
     explorerUrl: "https://sepolia.etherscan.io",
@@ -230,14 +233,12 @@ export function getPrimaryChain(): ChainConfig {
   return SUPPORTED_CHAINS[PRIMARY_CHAIN_KEY]!;
 }
 
-/** List all chains except the primary (for destination dropdown) */
 export function getDestinationChains(): Array<[string, ChainConfig]> {
   return Object.entries(SUPPORTED_CHAINS).filter(
     ([key]) => key !== PRIMARY_CHAIN_KEY,
   );
 }
 
-/** Standard minimal ERC-20 ABI */
 export const ERC20_ABI = [
   {
     type: "function",
@@ -275,7 +276,6 @@ export const ERC20_ABI = [
   },
 ] as const;
 
-/** Gateway Wallet contract ABI */
 export const GATEWAY_WALLET_ABI = [
   {
     type: "function",
@@ -283,3 +283,21 @@ export const GATEWAY_WALLET_ABI = [
     stateMutability: "nonpayable",
     inputs: [
       { name: "token", type: "address" },
+      { name: "value", type: "uint256" },
+    ],
+    outputs: [],
+  },
+] as const;
+
+export const GATEWAY_MINTER_ABI = [
+  {
+    type: "function",
+    name: "gatewayMint",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "attestationPayload", type: "bytes" },
+      { name: "signature", type: "bytes" },
+    ],
+    outputs: [],
+  },
+] as const;
