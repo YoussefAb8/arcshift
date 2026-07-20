@@ -2,8 +2,10 @@
  * config/chains.ts
  *
  * ArcShift multi-chain configuration.
- * Arc Testnet is primary, all others are Gateway destinations.
+ * Arc Testnet is primary, all others are Circle Gateway destinations.
  * ALL VALUES ARE TESTNET ONLY.
+ * 
+ * Only chains supported by Circle Gateway are included.
  */
 
 import { defineChain } from "viem";
@@ -90,22 +92,6 @@ export const optimismSepoliaTestnet: Chain = defineChain({
 });
 
 /**
- * Avalanche Fuji Testnet - manually defined
- */
-export const avalancheFujiTestnet: Chain = defineChain({
-  id: 43113,
-  name: "Avalanche Fuji",
-  nativeCurrency: { name: "Avalanche", symbol: "AVAX", decimals: 18 },
-  rpcUrls: {
-    default: { http: ["https://api.avax-test.network/ext/bc/C/rpc"] },
-  },
-  blockExplorers: {
-    default: { name: "Snowtrace", url: "https://testnet.snowtrace.io" },
-  },
-  testnet: true,
-});
-
-/**
  * Polygon Amoy Testnet - manually defined
  */
 export const polygonAmoyTestnet: Chain = defineChain({
@@ -117,22 +103,6 @@ export const polygonAmoyTestnet: Chain = defineChain({
   },
   blockExplorers: {
     default: { name: "PolygonScan", url: "https://amoy.polygonscan.com" },
-  },
-  testnet: true,
-});
-
-/**
- * BNB Chain Testnet - manually defined
- */
-export const bscTestnet: Chain = defineChain({
-  id: 97,
-  name: "BNB Chain Testnet",
-  nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
-  rpcUrls: {
-    default: { http: ["https://data-seed-prebsc-1-b7b.binance.org:8545"] },
-  },
-  blockExplorers: {
-    default: { name: "BscScan", url: "https://testnet.bscscan.com" },
   },
   testnet: true,
 });
@@ -201,14 +171,6 @@ export const SUPPORTED_CHAINS: Record<string, ChainConfig> = {
     explorerUrl: "https://sepolia-optimism.etherscan.io",
     faucetUrl: "https://www.alchemy.com/faucets/optimism-sepolia",
   },
-  avalancheFujiTestnet: {
-    label: "Avalanche Fuji",
-    chain: avalancheFujiTestnet,
-    domainId: 1,
-    usdcAddress: "0x5425890298aed601595a70AB815c96711a31Bc65",
-    explorerUrl: "https://testnet.snowtrace.io",
-    faucetUrl: "https://faucets.chain.link/fuji",
-  },
   polygonAmoyTestnet: {
     label: "Polygon Amoy",
     chain: polygonAmoyTestnet,
@@ -216,14 +178,6 @@ export const SUPPORTED_CHAINS: Record<string, ChainConfig> = {
     usdcAddress: "0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582",
     explorerUrl: "https://amoy.polygonscan.com",
     faucetUrl: "https://faucet.polygon.technology",
-  },
-  bscTestnet: {
-    label: "BNB Chain Testnet",
-    chain: bscTestnet,
-    domainId: 4,
-    usdcAddress: "0x64544969ed7EBf5f083679229b7CA3EA8675619f",
-    explorerUrl: "https://testnet.bscscan.com",
-    faucetUrl: "https://testnet.binance.org/faucet-smart",
   },
 };
 
