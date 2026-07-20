@@ -180,7 +180,7 @@ export function TransferPanel() {
           disabled={!isConnected || isBusy}
           className="w-full rounded-lg bg-action px-5 py-3 font-semibold text-white transition-colors hover:bg-action-dim disabled:opacity-40"
         >
-          {isBusy ? "Bridging…" : "Bridge"}
+         {isBusy ? "Sending…" : "Send"}
         </button>
 
         {status !== "idle" && (
@@ -204,18 +204,19 @@ export function TransferPanel() {
             )}
             {(status === "complete" || status === "error") && (
               <button
-                type="button"
-                onClick={() => {
-                  reset();
-                  if (status === "complete") {
-                    setRecipient("");
-                    setAmount("");
-                  }
-                }}
-                className="text-xs text-muted hover:text-paper mt-3 underline"
-              >
-                Bridge again
-              </button>
+                <button
+  type="button"
+  onClick={() => {
+    reset();
+    if (status === "complete") {
+      setRecipient("");
+      setAmount("");
+    }
+  }}
+  className="text-xs text-muted hover:text-paper mt-3 underline"
+>
+  Send again
+</button>
             )}
           </div>
         )}
