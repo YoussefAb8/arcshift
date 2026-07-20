@@ -94,10 +94,9 @@ export function TransferPanel() {
 
   return (
     <div className="rounded-2xl border border-line bg-panel p-8">
-      <h2 className="text-lg font-semibold mb-1">Bridge USDC</h2>
+     <h2 className="text-lg font-semibold mb-1">Send USDC</h2>
       <p className="text-sm text-muted mb-6">
-        Send USDC from Arc Testnet to any supported chain. One button,
-        everything else is automatic.
+        Send USDC from Arc Testnet to any supported chain instantly.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
