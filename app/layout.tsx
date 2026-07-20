@@ -3,8 +3,8 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "Arc USDC | Unified Balance",
-  description: "Testnet USDC transfers built on Arc and Circle Gateway",
+  title: "ArcShift | Bridge USDC",
+  description: "One-click cross-chain USDC bridging on Arc Testnet",
 };
 
 export default function RootLayout({
