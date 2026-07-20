@@ -2,12 +2,13 @@
 
 import { ConnectButton } from "@/components/ConnectButton";
 import { BalanceLedger } from "@/components/BalanceLedger";
-import { DepositPanel } from "@/components/DepositPanel";
 import { TransferPanel } from "@/components/TransferPanel";
 import { ToastProvider } from "@/components/Toast";
+import { useEnsureArcTestnet } from "@/hooks/useEnsureArcTestnet";
 import { getPrimaryChain } from "@/config/chains";
 
 export default function Home() {
+  useEnsureArcTestnet();
   const primary = getPrimaryChain();
 
   return (
@@ -24,23 +25,20 @@ export default function Home() {
         </header>
 
         <h1 className="font-mono text-3xl font-semibold mt-8 mb-2">
-          Unified Balance
+          ArcShift
         </h1>
         <p className="text-muted mb-10 max-w-lg">
-          Hold USDC on {primary.label}, deposit it into Gateway, and send it
-          to any supported chain from a single balance.
+          Send USDC across chains with one click. Connect your wallet on {primary.label}, enter an amount and destination, and your funds arrive instantly.
         </p>
 
         <div className="space-y-6">
-          
           <BalanceLedger />
-    
           <TransferPanel />
         </div>
 
         <footer className="mt-12 pt-6 border-t border-line text-xs text-muted">
-          Testnet only. No real funds are used. Faucet:{" "}
-          <a
+          Testnet only. No real funds are used. Get testnet USDC:{" "}
+          
             href={primary.faucetUrl}
             target="_blank"
             rel="noreferrer"
