@@ -2,49 +2,57 @@
 
 import { useEffect, useState } from "react";
 import { useAccount, useSignTypedData } from "wagmi";
-import { useGatewayTransfer } from "@/hooks/useGatewayTransfer";
+import { useBridgeTransfer } from "@/hooks/useBridgeTransfer";
 import { useUnifiedBalance } from "@/hooks/useUnifiedBalance";
+import { useUsdcBalance } from "@/hooks/useUsdcBalance";
 import { isValidEvmAddress, validateAmount } from "@/lib/usdc";
-import { getDestinationChains, PRIMARY_CHAIN_KEY } from "@/config/chains";
+import { getDestinationChains } from "@/config/chains";
 import { TransferPipeline } from "./TransferPipeline";
 import { useToast } from "./Toast";
 
 const STATUS_LABEL: Record<string, string> = {
-  signing: "Signing the burn intent in your wallet…",
-  attesting: "Waiting for Circle's Gateway to attest the transfer…",
-  "switching-network": "Switch your wallet to the destination network…",
-  minting: "Minting USDC on the destination chain…",
-  complete: "Transfer complete.",
-  error: "Transfer failed.",
+  approving: "Approving spending…",
+  depositing: "Preparing Unified Balance…",
+  signing: "Sign in your wallet…",
+  attesting: "Waiting for Circle Gateway…",
+  "switching-network": "Switch your wallet to destination network…",
+  minting: "Finalizing on destination chain…",
+  complete: "Bridge complete! USDC received on destination chain.",
+  error: "Bridge failed.",
 };
 
 export function TransferPanel() {
   const { address, isConnected } = useAccount();
   const { signTypedDataAsync } = useSignTypedData();
+  const balance = useUsdcBalance(address);
   const unified = useUnifiedBalance(address);
-  const { status, errorMessage, mintTxHash, transfer, reset } = useGatewayTransfer();
+  const { status, errorMessage, txHash, bridge, reset } = useBridgeTransfer();
   const toast = useToast();
 
   const destinations = getDestinationChains();
-  const [destinationKey, setDestinationKey] = useState(destinations[0]?.[0] ?? "");
+  const [destinationKey, setDestinationKey] = useState(
+    destinations[0]?.[0] ?? "",
+  );
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
-  const [fieldErrors, setFieldErrors] = useState<{ recipient?: string; amount?: string }>({});
+  const [fieldErrors, setFieldErrors] = useState<{
+    recipient?: string;
+    amount?: string;
+  }>({});
 
-  const sourceEntry = unified.entries.find((e) => e.key === PRIMARY_CHAIN_KEY);
-  const availableBalance = sourceEntry?.raw ?? 0n;
-
-  const isBusy = status !== "idle" && status !== "error" && status !== "complete";
+  const isBusy =
+    status !== "idle" && status !== "error" && status !== "complete";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const errors: { recipient?: string; amount?: string } = {};
 
     if (!isValidEvmAddress(recipient)) {
-      errors.recipient = "Enter a valid EVM address (0x followed by 40 hex characters)";
+      errors.recipient =
+        "Enter a valid EVM address (0x followed by 40 hex characters)";
     }
 
-    const amountResult = validateAmount(amount, availableBalance);
+    const amountResult = validateAmount(amount, balance.erc20Raw);
     if (!amountResult.ok) {
       errors.amount = amountResult.error;
     }
@@ -57,7 +65,7 @@ export function TransferPanel() {
 
     if (!address) return;
 
-    await transfer({
+    await bridge({
       destinationChainKey: destinationKey,
       recipientAddress: recipient as `0x${string}`,
       amount: amountResult.ok ? amountResult.amount : 0n,
@@ -67,24 +75,37 @@ export function TransferPanel() {
     });
   }
 
+  // On success, refresh balances and reset form
   useEffect(() => {
     if (status === "complete") {
+      balance.refetch();
       void unified.refetch();
+      toast.show(
+        "Bridge successful! USDC is on its way to the destination chain.",
+        "success",
+      );
+      setRecipient("");
+      setAmount("");
+      reset();
+    } else if (status === "error" && errorMessage) {
+      toast.show(errorMessage, "error");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
   return (
     <div className="rounded-2xl border border-line bg-panel p-8">
-      <h2 className="text-lg font-semibold mb-1">Send across chains</h2>
+      <h2 className="text-lg font-semibold mb-1">Bridge USDC</h2>
       <p className="text-sm text-muted mb-6">
-        Burns from your Unified Balance on Arc Testnet and mints on the
-        destination chain. This typically takes a few minutes to finalize.
+        Send USDC from Arc Testnet to any supported chain. One button,
+        everything else is automatic.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="destination" className="text-xs uppercase tracking-wider text-muted block mb-2">
+          <label
+            htmlFor="destination"
+            className="text-xs uppercase tracking-wider text-muted block mb-2"
+          >
             Destination chain
           </label>
           <select
@@ -103,7 +124,10 @@ export function TransferPanel() {
         </div>
 
         <div>
-          <label htmlFor="recipient" className="text-xs uppercase tracking-wider text-muted block mb-2">
+          <label
+            htmlFor="recipient"
+            className="text-xs uppercase tracking-wider text-muted block mb-2"
+          >
             Recipient address
           </label>
           <input
@@ -124,11 +148,14 @@ export function TransferPanel() {
         </div>
 
         <div>
-          <label htmlFor="transfer-amount" className="text-xs uppercase tracking-wider text-muted block mb-2">
+          <label
+            htmlFor="bridge-amount"
+            className="text-xs uppercase tracking-wider text-muted block mb-2"
+          >
             Amount (USDC)
           </label>
           <input
-            id="transfer-amount"
+            id="bridge-amount"
             type="text"
             inputMode="decimal"
             placeholder="0.00"
@@ -144,7 +171,8 @@ export function TransferPanel() {
             <p className="text-danger text-sm mt-2">{fieldErrors.amount}</p>
           )}
           <p className="text-xs text-muted mt-2">
-            Available in Unified Balance on Arc Testnet: {sourceEntry?.formatted ?? "0.00"} USDC
+            Available on Arc Testnet:{" "}
+            {balance.isLoading ? "—" : balance.erc20Formatted} USDC
           </p>
         </div>
 
@@ -153,7 +181,7 @@ export function TransferPanel() {
           disabled={!isConnected || isBusy}
           className="w-full rounded-lg bg-action px-5 py-3 font-semibold text-white transition-colors hover:bg-action-dim disabled:opacity-40"
         >
-          {isBusy ? "Processing…" : "Send"}
+          {isBusy ? "Bridging…" : "Bridge"}
         </button>
 
         {status !== "idle" && (
@@ -161,14 +189,18 @@ export function TransferPanel() {
             <TransferPipeline status={status === "error" ? "signing" : status} />
             <p
               className={`text-sm mt-4 ${
-                status === "error" ? "text-danger" : status === "complete" ? "text-success" : "text-pending"
+                status === "error"
+                  ? "text-danger"
+                  : status === "complete"
+                    ? "text-success"
+                    : "text-pending"
               }`}
             >
               {status === "error" ? errorMessage : STATUS_LABEL[status]}
             </p>
-            {mintTxHash && (
+            {txHash && (
               <p className="text-action text-xs mt-2 font-mono break-all">
-                Mint tx: {mintTxHash}
+                Tx: {txHash}
               </p>
             )}
             {(status === "complete" || status === "error") && (
@@ -177,14 +209,13 @@ export function TransferPanel() {
                 onClick={() => {
                   reset();
                   if (status === "complete") {
-                    toast.show("Cross-chain transfer complete", "success");
                     setRecipient("");
                     setAmount("");
                   }
                 }}
                 className="text-xs text-muted hover:text-paper mt-3 underline"
               >
-                Start a new transfer
+                Bridge again
               </button>
             )}
           </div>
