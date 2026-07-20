@@ -4,7 +4,6 @@ import { ConnectButton } from "@/components/ConnectButton";
 import { BalanceLedger } from "@/components/BalanceLedger";
 import { DepositPanel } from "@/components/DepositPanel";
 import { TransferPanel } from "@/components/TransferPanel";
-import { NetworkGuard } from "@/components/NetworkGuard";
 import { ToastProvider } from "@/components/Toast";
 import { getPrimaryChain } from "@/config/chains";
 
@@ -33,7 +32,7 @@ export default function Home() {
         </p>
 
         <div className="space-y-6">
-          <NetworkGuard />
+          
           <BalanceLedger />
     
           <TransferPanel />
