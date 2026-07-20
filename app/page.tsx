@@ -35,7 +35,7 @@ export default function Home() {
         <div className="space-y-6">
           <NetworkGuard />
           <BalanceLedger />
-          <DepositPanel />
+    
           <TransferPanel />
         </div>
 
