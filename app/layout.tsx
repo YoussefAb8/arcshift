@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
+import { ToastProvider } from "@/components/Toast";
 
 export const metadata: Metadata = {
-  title: "ArcShift | Bridge USDC",
-  description: "One-click cross-chain USDC bridging on Arc Testnet",
+  title: "ArcShift | Send USDC",
+  description: "One-click cross-chain USDC transfers on Arc Testnet",
 };
 
 export default function RootLayout({
@@ -15,7 +16,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans bg-ink text-paper min-h-screen antialiased">
-        <Providers>{children}</Providers>
+        <Providers>
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </Providers>
       </body>
     </html>
   );
