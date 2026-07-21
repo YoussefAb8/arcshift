@@ -1,53 +1,44 @@
-body{
-    background:#020617;
-    color:white;
-    font-family:Inter,sans-serif;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
+
+html, body {
+  background-color: #080C14;
+  color: #E8E6FF;
+  font-family: 'Inter', sans-serif;
 }
 
-input,
-select{
-    transition:.25s;
+* { box-sizing: border-box; }
+
+::selection {
+  background-color: #635AFF;
+  color: #ffffff;
 }
 
-input:hover,
-select:hover{
-    border-color:#3b82f6;
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(99,90,255,0.8); }
+  50% { opacity: 0.4; box-shadow: 0 0 2px rgba(99,90,255,0.3); }
 }
 
-input:focus,
-select:focus{
-
-    box-shadow:
-    0 0 0 3px rgba(59,130,246,.25);
-
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
 }
 
-.glass{
-
-    background:rgba(15,23,42,.55);
-
-    backdrop-filter:blur(16px);
-
-    border:1px solid rgba(255,255,255,.08);
-
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.gradient-button{
+.pulse-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
+.fade-in { animation: fade-in 0.4s ease-out forwards; }
+.glow-pulse { animation: glow-pulse 2s ease-in-out infinite; }
 
-background:linear-gradient(
-90deg,
-#2563eb,
-#4f46e5
-);
-
-transition:.25s;
-
-}
-
-.gradient-button:hover{
-
-transform:translateY(-2px);
-
-box-shadow:0 10px 30px rgba(37,99,235,.35);
-
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
