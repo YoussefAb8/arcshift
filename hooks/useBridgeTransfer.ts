@@ -154,6 +154,7 @@ export function useBridgeTransfer() {
       }
 
       // STEP 7: Switch back to Arc Testnet after minting
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       await switchChainAsync({ chainId: source.chain.id });
 
       setStatus("complete");
