@@ -1,13 +1,8 @@
-/**
- * hooks/useBridgeTransfer.ts
- *
- * Unified bridge flow: combines approve + deposit + sign burn intent +
- * attest + mint into ONE seamless operation from the user's perspective.
- */
 "use client";
 
 import { useState } from "react";
-import { useWriteContract, useSwitchChain, usePublicClient } from "wagmi";
+import { useWriteContract, useSwitchChain } from "wagmi";
+import { getPublicClient } from "wagmi/actions";
 import { buildBurnIntentTypedData, submitBurnIntent } from "@/lib/gateway";
 import {
   ERC20_ABI,
@@ -19,9 +14,7 @@ import {
   PRIMARY_CHAIN_KEY,
   getPrimaryChain,
 } from "@/config/chains";
-import { getPublicClient } from "wagmi/actions";
 import { wagmiConfig } from "@/lib/wagmi";
-import type { Chain } from "viem";
 
 export type BridgeStatus =
   | "idle"
@@ -61,25 +54,46 @@ export function useBridgeTransfer() {
         throw new Error("Unknown destination chain selected");
       }
 
-      // STEP 1: Approve (if needed)
+      // STEP 1: Approve
       setStatus("approving");
-      await writeContractAsync({
+      const approveHash = await writeContractAsync({
         address: source.usdcAddress,
         abi: ERC20_ABI,
         functionName: "approve",
         args: [GATEWAY_WALLET_ADDRESS, params.amount],
+        chainId: source.chain.id,
       });
 
-      // STEP 2: Deposit into Gateway Wallet (automatic, not shown separately to user)
+      const sourceClient = getPublicClient(wagmiConfig, {
+        chainId: source.chain.id,
+      });
+      if (sourceClient) {
+        await sourceClient.waitForTransactionReceipt({
+          hash: approveHash,
+          timeout: 180_000,
+          pollingInterval: 4_000,
+        });
+      }
+
+      // STEP 2: Deposit
       setStatus("depositing");
-      await writeContractAsync({
+      const depositHash = await writeContractAsync({
         address: GATEWAY_WALLET_ADDRESS,
         abi: GATEWAY_WALLET_ABI,
         functionName: "deposit",
         args: [source.usdcAddress, params.amount],
+        chainId: source.chain.id,
       });
 
-      // STEP 3: Sign burn intent (user signs in wallet)
+      if (sourceClient) {
+        await sourceClient.waitForTransactionReceipt({
+          hash: depositHash,
+          timeout: 180_000,
+          pollingInterval: 4_000,
+        });
+      }
+
+      // STEP 3: Sign burn intent
       setStatus("signing");
       const typedData = buildBurnIntentTypedData({
         sourceDomainId: source.domainId,
@@ -93,20 +107,18 @@ export function useBridgeTransfer() {
 
       const signature = await params.signTypedDataAsync(typedData);
 
-      // STEP 4: Get attestation from Gateway API
+      // STEP 4: Get attestation
       setStatus("attesting");
       const attestationResult = await submitBurnIntent(
         typedData.message,
         signature,
       );
 
-      // STEP 5: Switch network if needed
-      if (destination.chain.id !== source.chain.id) {
-        setStatus("switching-network");
-        await switchChainAsync({ chainId: destination.chain.id });
-      }
+      // STEP 5: Switch to destination chain BEFORE minting
+      setStatus("switching-network");
+      await switchChainAsync({ chainId: destination.chain.id });
 
-      // STEP 6: Mint on destination
+      // STEP 6: Mint on destination chain
       setStatus("minting");
       const mintHash = await writeContractAsync({
         address: GATEWAY_MINTER_ADDRESS,
@@ -117,10 +129,10 @@ export function useBridgeTransfer() {
       });
       setTxHash(mintHash);
 
-      // Wait for confirmation with generous timeout
       const destinationClient = getPublicClient(wagmiConfig, {
         chainId: destination.chain.id,
       });
+
       if (destinationClient) {
         try {
           await destinationClient.waitForTransactionReceipt({
@@ -131,18 +143,20 @@ export function useBridgeTransfer() {
         } catch (waitErr) {
           setStatus("error");
           setErrorMessage(
-            `Bridge transaction submitted (${mintHash}) but confirmation is taking longer than expected. ` +
-              `Check the destination chain explorer with this hash — it may have already succeeded.`,
+            `Transaction submitted (${mintHash}) but confirmation is taking longer than expected. Check the destination chain explorer — it may have already succeeded.`,
           );
           return;
         }
       }
 
+      // STEP 7: Switch back to Arc Testnet after minting
+      await switchChainAsync({ chainId: source.chain.id });
+
       setStatus("complete");
     } catch (err) {
       setStatus("error");
       setErrorMessage(
-        (err as Error).message ?? "The bridge could not be completed",
+        (err as Error).message ?? "The transfer could not be completed",
       );
     }
   }
