@@ -14,13 +14,13 @@ export function ConnectButton() {
   if (isConnected && address) {
     return (
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 rounded-full border border-line bg-panel px-3 py-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-success" />
+        <div className="flex items-center gap-2 rounded-full border border-line-strong bg-panel px-3 py-1.5">
+          <span className="h-2 w-2 rounded-full bg-success glow-pulse" />
           <span className="font-mono text-sm text-paper">
             {truncate(address)}
           </span>
           {chain && (
-            <span className="text-xs text-muted border-l border-line pl-2 ml-1">
+            <span className="text-xs text-brand-light border-l border-line pl-2 ml-1">
               {chain.name}
             </span>
           )}
@@ -41,7 +41,7 @@ export function ConnectButton() {
     <button
       onClick={() => injectedConnector && connect({ connector: injectedConnector })}
       disabled={isPending}
-      className="rounded-full bg-action px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-action-dim disabled:opacity-50"
+      className="rounded-full bg-brand-gradient px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
     >
       {isPending ? "Connecting…" : "Connect wallet"}
     </button>
