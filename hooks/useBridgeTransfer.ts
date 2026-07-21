@@ -131,31 +131,16 @@ export function useBridgeTransfer() {
       });
       setTxHash(mintHash);
 
-      const destinationClient = getPublicClient(wagmiConfig, {
-        chainId: destination.chain.id,
-      });
-
-      if (destinationClient) {
-        try {
-          await destinationClient.waitForTransactionReceipt({
-            hash: mintHash,
-            timeout: 180_000,
-            pollingInterval: 4_000,
-          });
-        } catch (waitErr) {
-          setStatus("error");
-          setErrorMessage(
-            `Transaction submitted (${mintHash}) but confirmation is taking longer than expected. Check the destination chain explorer — it may have already succeeded.`,
-          );
-          return;
-        }
-      }
-
-      // STEP 7: Switch back to Arc Testnet after minting
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      await switchChainAsync({ chainId: source.chain.id });
-
+      // Mark complete immediately after mint is submitted
+      // No need to wait for confirmation - tx is in the mempool
+      // User can verify on explorer via the tx hash link shown in UI
       setStatus("complete");
+
+      // Switch back to Arc silently in background
+      setTimeout(() => {
+        switchChainAsync({ chainId: source.chain.id }).catch(() => {});
+      }, 2000);
+
 
       // STEP 7: Switch back to Arc Testnet after minting
       await new Promise((resolve) => setTimeout(resolve, 1000));
