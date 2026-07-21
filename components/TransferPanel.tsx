@@ -1,5 +1,6 @@
 "use client";
 
+import { SUPPORTED_CHAINS } from "@/config/chains";
 import { useEffect, useState } from "react";
 import { useAccount, useSignTypedData } from "wagmi";
 import { useBridgeTransfer } from "@/hooks/useBridgeTransfer";
@@ -185,39 +186,54 @@ export function TransferPanel() {
 
         {status !== "idle" && (
           <div className="rounded-lg border border-line bg-ink p-5">
-            <TransferPipeline
-              status={status === "error" ? "signing" : status}
-            />
-            <p
-              className={`text-sm mt-4 ${
-                status === "error"
-                  ? "text-danger"
-                  : status === "complete"
-                    ? "text-success"
-                    : "text-pending"
-              }`}
-            >
-              {status === "error" ? errorMessage : STATUS_LABEL[status]}
-            </p>
-            {txHash && (
-              <p className="text-action text-xs mt-2 font-mono break-all">
-                Tx: {txHash}
-              </p>
+            {status === "complete" && (
+              <div>
+                <p className="text-success text-sm font-medium">
+                  Transfer submitted successfully
+                </p>
+                <p className="text-muted text-xs mt-1">
+                  USDC is on its way. This usually takes 2-5 minutes on testnet.
+                </p>
+                {txHash && (
+                  
+                    href={`${SUPPORTED_CHAINS[destinationKey]?.explorerUrl}/tx/${txHash}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-action text-xs block mt-2 hover:underline"
+                  >
+                    View transaction on explorer →
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={() => { reset(); setRecipient(""); setAmount(""); }}
+                  className="text-xs text-muted hover:text-paper mt-3 underline block"
+                >
+                  Send again
+                </button>
+              </div>
             )}
-            {(status === "complete" || status === "error") && (
-              <button
-                type="button"
-                onClick={() => {
-                  reset();
-                  if (status === "complete") {
-                    setRecipient("");
-                    setAmount("");
-                  }
-                }}
-                className="text-xs text-muted hover:text-paper mt-3 underline"
-              >
-                Send again
-              </button>
+
+            {status === "error" && (
+              <div>
+                <p className="text-danger text-sm">{errorMessage}</p>
+                <button
+                  type="button"
+                  onClick={() => reset()}
+                  className="text-xs text-muted hover:text-paper mt-3 underline block"
+                >
+                  Try again
+                </button>
+              </div>
+            )}
+
+            {status !== "complete" && status !== "error" && (
+              <div className="flex items-center gap-3">
+                <span className="h-2 w-2 rounded-full bg-pending pulse-dot" />
+                <p className="text-pending text-sm">
+                  {STATUS_LABEL[status]}
+                </p>
+              </div>
             )}
           </div>
         )}
