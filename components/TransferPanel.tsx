@@ -8,7 +8,6 @@ import { useUnifiedBalance } from "@/hooks/useUnifiedBalance";
 import { useUsdcBalance } from "@/hooks/useUsdcBalance";
 import { isValidEvmAddress, validateAmount } from "@/lib/usdc";
 import { getDestinationChains } from "@/config/chains";
-import { TransferPipeline } from "./TransferPipeline";
 import { useToast } from "./Toast";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -25,28 +24,37 @@ const STATUS_LABEL: Record<string, string> = {
 export function TransferPanel() {
   const { address, isConnected } = useAccount();
   const { signTypedDataAsync } = useSignTypedData();
+
   const balance = useUsdcBalance(address);
   const unified = useUnifiedBalance(address);
   const { status, errorMessage, txHash, bridge, reset } = useBridgeTransfer();
   const toast = useToast();
 
   const destinations = getDestinationChains();
+
   const [destinationKey, setDestinationKey] = useState(
-    destinations[0]?.[0] ?? "",
+    destinations[0]?.[0] ?? ""
   );
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
+
   const [fieldErrors, setFieldErrors] = useState<{
     recipient?: string;
     amount?: string;
   }>({});
 
   const isBusy =
-    status !== "idle" && status !== "error" && status !== "complete";
+    status !== "idle" &&
+    status !== "error" &&
+    status !== "complete";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const errors: { recipient?: string; amount?: string } = {};
+
+    const errors: {
+      recipient?: string;
+      amount?: string;
+    } = {};
 
     if (!isValidEvmAddress(recipient)) {
       errors.recipient =
@@ -54,6 +62,7 @@ export function TransferPanel() {
     }
 
     const amountResult = validateAmount(amount, balance.erc20Raw);
+
     if (!amountResult.ok) {
       errors.amount = amountResult.error;
     }
@@ -62,6 +71,7 @@ export function TransferPanel() {
       setFieldErrors(errors);
       return;
     }
+
     setFieldErrors({});
 
     if (!address) return;
@@ -73,7 +83,7 @@ export function TransferPanel() {
       depositorAddress: address,
       signTypedDataAsync: (typedData) =>
         signTypedDataAsync(
-          typedData as Parameters<typeof signTypedDataAsync>[0],
+          typedData as Parameters<typeof signTypedDataAsync>[0]
         ),
     });
   }
@@ -82,22 +92,35 @@ export function TransferPanel() {
     if (status === "complete") {
       balance.refetch();
       void unified.refetch();
+
       toast.show(
         "Transfer complete! USDC is on its way to the destination chain.",
-        "success",
+        "success"
       );
+
       setRecipient("");
       setAmount("");
+
       reset();
     } else if (status === "error" && errorMessage) {
       toast.show(errorMessage, "error");
     }
-  }, [status]);
+  }, [
+    status,
+    errorMessage,
+    balance,
+    unified,
+    toast,
+    reset,
+  ]);
 
   return (
     <div className="rounded-2xl border border-line bg-panel p-8">
-      <h2 className="text-lg font-semibold mb-1">Send USDC</h2>
-      <p className="text-sm text-muted mb-6">
+      <h2 className="mb-1 text-lg font-semibold">
+        Send USDC
+      </h2>
+
+      <p className="mb-6 text-sm text-muted">
         Send USDC from Arc Testnet to any supported chain instantly.
       </p>
 
@@ -105,10 +128,11 @@ export function TransferPanel() {
         <div>
           <label
             htmlFor="destination"
-            className="text-xs uppercase tracking-wider text-muted block mb-2"
+            className="mb-2 block text-xs uppercase tracking-wider text-muted"
           >
             Destination chain
           </label>
+
           <select
             id="destination"
             value={destinationKey}
@@ -127,10 +151,11 @@ export function TransferPanel() {
         <div>
           <label
             htmlFor="recipient"
-            className="text-xs uppercase tracking-wider text-muted block mb-2"
+            className="mb-2 block text-xs uppercase tracking-wider text-muted"
           >
             Recipient address
           </label>
+
           <input
             id="recipient"
             type="text"
@@ -139,22 +164,29 @@ export function TransferPanel() {
             disabled={!isConnected || isBusy}
             onChange={(e) => {
               setRecipient(e.target.value);
-              setFieldErrors((prev) => ({ ...prev, recipient: undefined }));
+              setFieldErrors((prev) => ({
+                ...prev,
+                recipient: undefined,
+              }));
             }}
             className="w-full rounded-lg border border-line bg-ink px-4 py-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-action disabled:opacity-50"
           />
+
           {fieldErrors.recipient && (
-            <p className="text-danger text-sm mt-2">{fieldErrors.recipient}</p>
+            <p className="mt-2 text-sm text-danger">
+              {fieldErrors.recipient}
+            </p>
           )}
         </div>
 
         <div>
           <label
             htmlFor="send-amount"
-            className="text-xs uppercase tracking-wider text-muted block mb-2"
+            className="mb-2 block text-xs uppercase tracking-wider text-muted"
           >
             Amount (USDC)
           </label>
+
           <input
             id="send-amount"
             type="text"
@@ -164,15 +196,26 @@ export function TransferPanel() {
             disabled={!isConnected || isBusy}
             onChange={(e) => {
               setAmount(e.target.value);
-              setFieldErrors((prev) => ({ ...prev, amount: undefined }));
+              setFieldErrors((prev) => ({
+                ...prev,
+                amount: undefined,
+              }));
             }}
             className="w-full rounded-lg border border-line bg-ink px-4 py-3 font-mono text-lg tabular-nums focus:outline-none focus:ring-2 focus:ring-action disabled:opacity-50"
           />
+
           {fieldErrors.amount && (
-            <p className="text-danger text-sm mt-2">{fieldErrors.amount}</p>
+            <p className="mt-2 text-sm text-danger">
+              {fieldErrors.amount}
+            </p>
           )}
-          <p className="text-xs text-muted mt-2">
-            Available: {balance.isLoading ? "..." : balance.erc20Formatted} USDC
+
+          <p className="mt-2 text-xs text-muted">
+            Available:{" "}
+            {balance.isLoading
+              ? "..."
+              : balance.erc20Formatted}{" "}
+            USDC
           </p>
         </div>
 
@@ -188,26 +231,33 @@ export function TransferPanel() {
           <div className="rounded-lg border border-line bg-ink p-5">
             {status === "complete" && (
               <div>
-                <p className="text-success text-sm font-medium">
+                <p className="text-sm font-medium text-success">
                   Transfer submitted successfully
                 </p>
-                <p className="text-muted text-xs mt-1">
-                  USDC is on its way. This usually takes 2-5 minutes on testnet.
+
+                <p className="mt-1 text-xs text-muted">
+                  USDC is on its way. This usually takes 2–5 minutes on testnet.
                 </p>
+
                 {txHash && (
-                  
+                  <a
                     href={`${SUPPORTED_CHAINS[destinationKey]?.explorerUrl}/tx/${txHash}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-action text-xs block mt-2 hover:underline"
+                    className="mt-2 block text-xs text-action hover:underline"
                   >
                     View transaction on explorer →
                   </a>
                 )}
+
                 <button
                   type="button"
-                  onClick={() => { reset(); setRecipient(""); setAmount(""); }}
-                  className="text-xs text-muted hover:text-paper mt-3 underline block"
+                  onClick={() => {
+                    reset();
+                    setRecipient("");
+                    setAmount("");
+                  }}
+                  className="mt-3 block text-xs text-muted underline hover:text-paper"
                 >
                   Send again
                 </button>
@@ -216,25 +266,30 @@ export function TransferPanel() {
 
             {status === "error" && (
               <div>
-                <p className="text-danger text-sm">{errorMessage}</p>
+                <p className="text-sm text-danger">
+                  {errorMessage}
+                </p>
+
                 <button
                   type="button"
                   onClick={() => reset()}
-                  className="text-xs text-muted hover:text-paper mt-3 underline block"
+                  className="mt-3 block text-xs text-muted underline hover:text-paper"
                 >
                   Try again
                 </button>
               </div>
             )}
 
-            {status !== "complete" && status !== "error" && (
-              <div className="flex items-center gap-3">
-                <span className="h-2 w-2 rounded-full bg-pending pulse-dot" />
-                <p className="text-pending text-sm">
-                  {STATUS_LABEL[status]}
-                </p>
-              </div>
-            )}
+            {status !== "complete" &&
+              status !== "error" && (
+                <div className="flex items-center gap-3">
+                  <span className="pulse-dot h-2 w-2 rounded-full bg-pending" />
+
+                  <p className="text-sm text-pending">
+                    {STATUS_LABEL[status]}
+                  </p>
+                </div>
+              )}
           </div>
         )}
       </form>
