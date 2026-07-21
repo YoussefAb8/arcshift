@@ -114,18 +114,22 @@ export function useBridgeTransfer() {
         signature,
       );
 
-      // STEP 5: Switch to destination chain BEFORE minting
+     // STEP 5: Switch to destination chain BEFORE minting
       setStatus("switching-network");
       await switchChainAsync({ chainId: destination.chain.id });
 
+      // Wait for wallet state to fully update after chain switch
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       // STEP 6: Mint on destination chain
+      // NOTE: no chainId here - wagmi uses the current wallet chain
+      // which we just switched to above
       setStatus("minting");
       const mintHash = await writeContractAsync({
         address: GATEWAY_MINTER_ADDRESS,
         abi: GATEWAY_MINTER_ABI,
         functionName: "gatewayMint",
         args: [attestationResult.attestation, attestationResult.signature],
-        chainId: destination.chain.id,
       });
       setTxHash(mintHash);
 
