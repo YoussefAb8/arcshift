@@ -121,9 +121,7 @@ export function useBridgeTransfer() {
       // Wait for wallet state to fully update after chain switch
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // STEP 6: Mint on destination chain
-      // NOTE: no chainId here - wagmi uses the current wallet chain
-      // which we just switched to above
+     // STEP 6: Mint on destination chain
       setStatus("minting");
       const mintHash = await writeContractAsync({
         address: GATEWAY_MINTER_ADDRESS,
@@ -152,6 +150,12 @@ export function useBridgeTransfer() {
           return;
         }
       }
+
+      // STEP 7: Switch back to Arc Testnet after minting
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await switchChainAsync({ chainId: source.chain.id });
+
+      setStatus("complete");
 
       // STEP 7: Switch back to Arc Testnet after minting
       await new Promise((resolve) => setTimeout(resolve, 1000));
