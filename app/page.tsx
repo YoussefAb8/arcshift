@@ -28,7 +28,7 @@ export default function Home() {
           ArcShift
         </h1>
         <p className="text-muted mb-10 max-w-lg">
-          Send USDC across chains with one click. Connect your wallet on {primary.label}, enter an amount and destination, and your funds arrive instantly.
+          Send USDC across chains with one click. Connect your wallet, enter an amount and destination, and your funds arrive instantly.
         </p>
 
         <div className="space-y-6">
