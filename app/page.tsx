@@ -48,8 +48,7 @@ export default function Home() {
         </h1>
 
         <p className="mx-auto max-w-2xl text-lg leading-8 text-muted">
-          Send USDC from Arc Testnet to any supported chain with one click.
-          Approve, deposit, sign, and mint handled automatically.
+          Transfer USDC from Arc Testnet to supported chains in one click. Fast, secure, and powered by Circle Gateway.
         </p>
 
       </section>
