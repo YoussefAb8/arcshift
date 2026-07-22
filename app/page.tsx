@@ -13,7 +13,7 @@ export default function Home() {
       <nav className="flex items-center justify-between mb-12">
         <div className="flex items-center gap-3">
           <span className="font-display text-xl font-bold bg-brand-gradient bg-clip-text text-transparent">ArcShift</span>
-          <span className="text-xs bg-brand/10 border border-line-strong text-brand-light px-2 py-0.5 rounded-full">TESTNET</span>
+          <span className="text-xs bg-ink border border-line-strong text-brand-light px-2 py-0.5 rounded-full">TESTNET</span>
         </div>
         <ConnectButton />
       </nav>
@@ -31,7 +31,7 @@ export default function Home() {
           <div className="text-xs text-muted mt-1">Bridge experience</div>
         </div>
         <div className="rounded-xl border border-line bg-card p-4">
-          <div className="font-display text-2xl font-bold text-white">$0</div>
+          <div className="font-display text-2xl font-bold text-white">0</div>
           <div className="text-xs text-muted mt-1">Bridge fees</div>
         </div>
       </div>
