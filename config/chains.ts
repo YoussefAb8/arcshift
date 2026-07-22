@@ -50,7 +50,11 @@ export const polygonAmoyTestnet: Chain = defineChain({
   id: 80002,
   name: "Polygon Amoy",
   nativeCurrency: { name: "Polygon", symbol: "POL", decimals: 18 },
-  rpcUrls: { default: { http: ["https://rpc-amoy.polygon.technology"] } },
+  rpcUrls: {
+  default: {
+    http: ["https://polygon-amoy.drpc.org"],
+  },
+},
   blockExplorers: { default: { name: "PolygonScan", url: "https://amoy.polygonscan.com" } },
   testnet: true,
 });
