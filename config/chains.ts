@@ -109,7 +109,7 @@ export const SUPPORTED_CHAINS: Record<string, ChainConfig> = {
   optimismSepolia: {
     label: "Optimism Sepolia",
     chain: optimismSepoliaTestnet,
-    domainId: 5,
+    domainId: 2,
     usdcAddress: "0x5fd84259d66Cd46123540766Be93DFE6D43130D7",
     explorerUrl: "https://sepolia-optimism.etherscan.io",
     faucetUrl: "https://faucet.circle.com",
