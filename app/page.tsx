@@ -1,47 +1,84 @@
-﻿"use client";
+"use client";
+
 import React from "react";
 import { ConnectButton } from "@/components/ConnectButton";
 import { BalanceLedger } from "@/components/BalanceLedger";
 import { TransferPanel } from "@/components/TransferPanel";
 import { useEnsureArcTestnet } from "@/hooks/useEnsureArcTestnet";
 import { getPrimaryChain } from "@/config/chains";
+
 export default function Home() {
   useEnsureArcTestnet();
+
   const primary = getPrimaryChain();
+
   return (
-    <main className="max-w-3xl mx-auto px-6 py-10">
-      <nav className="flex items-center justify-between mb-12">
+    <main className="max-w-6xl mx-auto px-6 py-8">
+
+      {/* Navbar */}
+      <nav className="flex items-center justify-between mb-20">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="ArcShift" className="h-8 w-auto" />
-          <span className="text-xs bg-ink border border-line-strong text-brand-light px-2 py-0.5 rounded-full">TESTNET</span>
+          <img
+            src="/logo.png"
+            alt="ArcShift"
+            className="h-10 w-auto"
+          />
+
+          <span className="rounded-full border border-line-strong bg-ink px-3 py-1 text-xs text-brand-light">
+            TESTNET
+          </span>
         </div>
+
         <ConnectButton />
       </nav>
-      <div className="mb-10">
-        <h1 className="font-display text-4xl font-bold text-white leading-tight mb-3">Bridge USDC, instantly.</h1>
-        <p className="text-muted text-base max-w-lg leading-relaxed">Send USDC from Arc Testnet to any supported chain with one click. Approve, deposit, sign, and mint handled automatically.</p>
-      </div>
-      <div className="grid grid-cols-3 gap-3 mb-8">
-        <div className="rounded-xl border border-line bg-card p-4">
-          <div className="font-display text-2xl font-bold text-white">5</div>
-          <div className="text-xs text-muted mt-1">Chains supported</div>
-        </div>
-        <div className="rounded-xl border border-line bg-card p-4">
-          <div className="font-display text-2xl font-bold text-white">1-click</div>
-          <div className="text-xs text-muted mt-1">Bridge experience</div>
-        </div>
-        <div className="rounded-xl border border-line bg-card p-4">
-          <div className="font-display text-2xl font-bold text-white">0</div>
-          <div className="text-xs text-muted mt-1">Bridge fees</div>
-        </div>
-      </div>
-      <div className="space-y-4">
+
+      {/* Hero */}
+      <section className="text-center mb-16">
+
+        <h1 className="font-display text-5xl md:text-6xl font-bold leading-tight mb-6">
+
+          <span className="text-white">
+            Bridge USDC,
+          </span>{" "}
+
+          <span className="bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 bg-clip-text text-transparent">
+            instantly.
+          </span>
+
+        </h1>
+
+        <p className="mx-auto max-w-2xl text-lg leading-8 text-muted">
+          Send USDC from Arc Testnet to any supported chain with one click.
+          Approve, deposit, sign, and mint handled automatically.
+        </p>
+
+      </section>
+
+      {/* Main Content */}
+      <div className="space-y-6">
+
         <BalanceLedger />
+
         <TransferPanel />
+
       </div>
-      <footer className="mt-10 pt-6 border-t border-line flex items-center justify-between">
-        <span className="text-xs text-muted">Testnet only. No real funds.</span>
-        <a href={primary.faucetUrl} target="_blank" rel="noreferrer" className="text-xs text-brand hover:text-brand-light transition-colors">Get testnet USDC</a>
+
+      {/* Footer */}
+      <footer className="mt-14 flex items-center justify-between border-t border-line pt-6">
+
+        <span className="text-xs text-muted">
+          Testnet only. No real funds.
+        </span>
+
+        <a
+          href={primary.faucetUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="text-xs text-brand transition-colors hover:text-brand-light"
+        >
+          Get testnet USDC
+        </a>
+
       </footer>
     </main>
   );
