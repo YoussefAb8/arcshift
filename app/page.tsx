@@ -12,7 +12,7 @@ export default function Home() {
     <main className="max-w-3xl mx-auto px-6 py-10">
       <nav className="flex items-center justify-between mb-12">
         <div className="flex items-center gap-3">
-          <span className="font-display text-xl font-bold bg-brand-gradient bg-clip-text text-transparent">ArcShift</span>
+          <img src="/logo.png" alt="ArcShift" className="h-8 w-auto" />
           <span className="text-xs bg-ink border border-line-strong text-brand-light px-2 py-0.5 rounded-full">TESTNET</span>
         </div>
         <ConnectButton />
